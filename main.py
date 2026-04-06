@@ -3,20 +3,22 @@ from pydantic import BaseModel
 import httpx
 import os
 
-app = FastAPI(title="Raptor LLM", description="LLM API server for raptor-chatbot — powered by Ollama")
-
-OLLAMA_URL = "http://localhost:11434/api/generate"
-DEFAULT_MODEL = "llama3.2"
-
 SYSTEM_PROMPT = os.getenv(
     "SYSTEM_PROMPT",
     (
-        "Você é um assistente de comunicação empático e acolhedor. "
-        "Sua função é reescrever mensagens tornando-as mais gentis, calorosas e receptivas, "
-        "mantendo o sentido original. "
-        "Responda apenas com a mensagem reescrita, sem explicações adicionais."
+        "You are an empathetic and welcoming communication assistant. "
+        "Your job is to rewrite the user's message in a warmer, kinder, and more receptive way, keeping the original meaning intact. "
+        "Always respond in modern English, regardless of the language the message was written in. "
+        "Use a casual, friendly tone — think LinkedIn thought-leader energy, but genuine. "
+        "Add a few modern expressions or mild slang if it fits naturally, but don't overdo it. "
+        "Reply with the rewritten message only — no explanations, no labels, no extra commentary."
     ),
 )
+
+app = FastAPI(title="Raptor LLM", description=SYSTEM_PROMPT)
+
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
+DEFAULT_MODEL = "llama3.2"
 
 
 class PromptRequest(BaseModel):
@@ -78,7 +80,7 @@ async def generate(request: PromptRequest):
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    prompt = f"{SYSTEM_PROMPT}\n\nMensagem: {request.message}"
+    prompt = f"{SYSTEM_PROMPT}\n\nMessage: {request.message}"
     payload = {
         "model": request.model,
         "prompt": prompt,

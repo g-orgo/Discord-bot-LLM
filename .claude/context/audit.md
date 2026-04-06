@@ -1,15 +1,18 @@
-# 🔍 Audit Summary — Raptor LLM
-**Date:** April 6, 2026
+# Audit Summary — Raptor LLM
+**Latest run:** April 6, 2026 (run 3)
 
 ---
 
-## ✅ All clear — no critical issues
+## Run 3 — Language consistency pass
 
-The LLM server is clean, well-structured, and follows all conventions.
+### Fixed
+
+- **Portuguese prompt label in `/chat`** — `"Mensagem: {message}"` changed to `"Message: {message}"`
+- **Stale `main.md` context file** — rewritten in English with updated architecture (env vars, system prompt format, FastAPI description)
 
 ---
 
-## 📋 Health check
+## Health check
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -17,12 +20,22 @@ The LLM server is clean, well-structured, and follows all conventions.
 | System prompt | ✅ Good | Correctly injected in `/chat`, absent in `/generate` |
 | Ollama integration | ✅ Good | Async, correct timeout (120s), stream disabled |
 | Input validation | ✅ Good | All request bodies use Pydantic models |
+| OLLAMA_URL configurable | ✅ Good | Reads from env var with local default |
+| English-only output | ✅ Good | System prompt explicitly instructs LLM to reply in English |
 
 ---
 
-## 🔧 Small fix applied
+## Still open (low priority)
 
-The app's internal description still said "Hello World" from the initial setup. Updated to reflect what it actually does.
+- **System prompt resets on restart** — changes via `PUT /system-prompt` are in-memory only
+- **`GET /system-prompt` has no auth** — acceptable for local dev use
+
+---
+
+## History
+- **Run 1** — No issues found
+- **Run 2** — `OLLAMA_URL` env var added; FastAPI description updated
+- **Run 3** — Portuguese prompt label fixed; `main.md` context updated
 
 ---
 
