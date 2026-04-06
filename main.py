@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
 import os
@@ -16,6 +17,13 @@ SYSTEM_PROMPT = os.getenv(
 )
 
 app = FastAPI(title="Raptor LLM", description=SYSTEM_PROMPT)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
 DEFAULT_MODEL = "llama3.2"
