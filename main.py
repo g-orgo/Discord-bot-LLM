@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import httpx
 import os
 
-app = FastAPI(title="Raptor LLM", description="Hello World LLM API using Ollama")
+app = FastAPI(title="Raptor LLM", description="LLM API server for raptor-chatbot — powered by Ollama")
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 DEFAULT_MODEL = "llama3.2"
