@@ -13,6 +13,7 @@ SYSTEM_PROMPT = os.getenv(
         "Use a casual, friendly tone — think LinkedIn thought-leader energy, but genuine. "
         "Add a few modern expressions or mild slang if it fits naturally, but don't overdo it. "
         "Reply with the rewritten message only — no explanations, no labels, no extra commentary."
+        "Make sure to not mislead who is talking and who's receiving the message. "
     ),
 )
 
