@@ -6,10 +6,14 @@
 FastAPI app that proxies prompts to Ollama. Exposes `/generate` (generic) and `/chat` (used by raptor-chatbot). Supports a configurable system prompt that instructs the LLM to act as a welcoming communication assistant that always responds in English.
 
 ## Architecture
-- Single file: `main.py`
+- Entry point: `main.py` (FastAPI app, lifespan, middleware, router registration)
+- Config: `config.py` (env vars: `OLLAMA_URL`, `OLLAMA_BASE_URL`, `DEFAULT_MODEL`, `OLLAMA_TIMEOUT`, `OLLAMA_PULL_TIMEOUT`, `CORS_ORIGIN`, `SYSTEM_PROMPT`)
+- Ollama client: `ollama.py` (`ollama_generate` for blocking, `ollama_generate_stream` async generator for SSE)
+- System prompt state: `system_prompt.py` (mutable module-level `_prompt` list)
+- Schemas: `schemas.py` (Pydantic models for all I/O)
+- Routes: `routes/chat.py` (`/chat`, `/chat/stream`), `routes/generate.py` (`/generate`), `routes/system_prompt.py`
 - Ollama: configurable via `OLLAMA_URL` env var, default `http://localhost:11434/api/generate`; model default `llama3.2:3b`
 - `SYSTEM_PROMPT` global: configurable via `SYSTEM_PROMPT` env var or `PUT /system-prompt` at runtime
-- FastAPI `description` is set to `SYSTEM_PROMPT` — visible in Swagger UI at `/docs`
 
 ## Endpoints
 

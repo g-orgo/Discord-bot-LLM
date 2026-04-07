@@ -37,6 +37,8 @@ Single-file FastAPI application (`main.py`).
 - `OLLAMA_URL` — `http://localhost:11434/api/generate`
 - `DEFAULT_MODEL` — `llama3.2:3b`
 - `SYSTEM_PROMPT` — configurable via `SYSTEM_PROMPT` env var or `PUT /system-prompt` at runtime
+- `OLLAMA_TIMEOUT` — httpx timeout for generation requests (default `120.0`s, configurable via env var)
+- `OLLAMA_PULL_TIMEOUT` — timeout for model pull at startup (default `600.0`s, configurable via env var)
 
 ## Endpoints
 
@@ -46,7 +48,8 @@ Single-file FastAPI application (`main.py`).
 | `GET` | `/system-prompt` | Returns the current system prompt |
 | `PUT` | `/system-prompt` | Updates the system prompt in runtime (body: `{ prompt }`) |
 | `POST` | `/generate` | Generic LLM generation — no system prompt injected |
-| `POST` | `/chat` | Chat endpoint for raptor-chatbot — system prompt injected |
+| `POST` | `/chat` | Chat endpoint for raptor-chatbot — system prompt injected, returns full response |
+| `POST` | `/chat/stream` | Streaming chat — returns SSE tokens as they are generated |
 
 Interactive docs: `http://localhost:8000/docs`
 
