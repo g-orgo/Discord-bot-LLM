@@ -20,7 +20,7 @@ No test suite is configured.
 **Local dev:** Requires [Ollama](https://ollama.com) running locally on `http://localhost:11434`.
 
 ```bash
-ollama pull llama3.2   # pull the default model
+ollama pull llama3.2:3b   # pull the default model
 ollama serve           # start Ollama if not running as a service
 ```
 
@@ -35,7 +35,7 @@ Single-file FastAPI application (`main.py`).
 
 **Key constants in `main.py`:**
 - `OLLAMA_URL` — `http://localhost:11434/api/generate`
-- `DEFAULT_MODEL` — `llama3.2`
+- `DEFAULT_MODEL` — `llama3.2:3b`
 - `SYSTEM_PROMPT` — configurable via `SYSTEM_PROMPT` env var or `PUT /system-prompt` at runtime
 
 ## Endpoints

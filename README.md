@@ -13,8 +13,8 @@ Hello World de um sistema LLM com **FastAPI** + **Ollama**.
 # Instalar dependências
 pip install -r requirements.txt
 
-# Baixar um modelo no Ollama (ex: llama3.2)
-ollama pull llama3.2
+# Baixar um modelo no Ollama (ex: llama3.2:3b)
+ollama pull llama3.2:3b
 
 # Subir o servidor Ollama (se não tiver rodando)
 ollama serve
@@ -40,14 +40,14 @@ Gera uma resposta do LLM.
 ```json
 {
   "prompt": "Olá! Quem é você?",
-  "model": "llama3.2"
+  "model": "llama3.2:3b"
 }
 ```
 
 **Response:**
 ```json
 {
-  "model": "llama3.2",
+  "model": "llama3.2:3b",
   "response": "Olá! Sou um assistente de IA..."
 }
 ```

@@ -7,7 +7,7 @@ FastAPI app that proxies prompts to Ollama. Exposes `/generate` (generic) and `/
 
 ## Architecture
 - Single file: `main.py`
-- Ollama: configurable via `OLLAMA_URL` env var, default `http://localhost:11434/api/generate`; model default `llama3.2`
+- Ollama: configurable via `OLLAMA_URL` env var, default `http://localhost:11434/api/generate`; model default `llama3.2:3b`
 - `SYSTEM_PROMPT` global: configurable via `SYSTEM_PROMPT` env var or `PUT /system-prompt` at runtime
 - FastAPI `description` is set to `SYSTEM_PROMPT` — visible in Swagger UI at `/docs`
 

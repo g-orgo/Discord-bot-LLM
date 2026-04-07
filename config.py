@@ -1,8 +1,14 @@
 import os
+from urllib.parse import urlparse
 
 OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434/api/generate")
-DEFAULT_MODEL: str = "llama3.2"
+DEFAULT_MODEL: str = "llama3.2:3b"
 CORS_ORIGIN: str = os.getenv("CORS_ORIGIN", "http://localhost:5173")
+OLLAMA_TIMEOUT: float = float(os.getenv("OLLAMA_TIMEOUT", "120.0"))
+OLLAMA_PULL_TIMEOUT: float = float(os.getenv("OLLAMA_PULL_TIMEOUT", "600.0"))
+
+_parsed = urlparse(OLLAMA_URL)
+OLLAMA_BASE_URL: str = f"{_parsed.scheme}://{_parsed.netloc}"
 
 SYSTEM_PROMPT_DEFAULT = (
     "You are an empathetic and welcoming communication assistant. "
