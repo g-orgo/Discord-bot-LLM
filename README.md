@@ -60,7 +60,7 @@ Generic LLM generation — sends a raw prompt directly to Ollama.
 **Body:**
 ```json
 {
-  "prompt": "Olá! Quem é você?",
+  "prompt": "Hello! Who are you?",
   "model": "qwen2.5:7b"
 }
 ```
@@ -69,7 +69,7 @@ Generic LLM generation — sends a raw prompt directly to Ollama.
 ```json
 {
   "model": "qwen2.5:7b",
-  "response": "Olá! Sou um assistente de IA..."
+  "response": "Hello! I am an AI assistant..."
 }
 ```
 
