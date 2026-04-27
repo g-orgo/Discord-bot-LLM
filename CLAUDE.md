@@ -23,7 +23,7 @@ Requires [Ollama](https://ollama.com) installed and running locally.
 
 ```bash
 # Pull a model
-ollama pull llama3.2:3b
+ollama pull qwen2.5:7b
 
 # Start Ollama (if not running as a service)
 ollama serve
@@ -42,7 +42,7 @@ Single-file FastAPI application (`main.py`) that proxies prompts to a local Olla
 
 **Key constants in `main.py`:**
 - `OLLAMA_URL` — Ollama endpoint (`http://localhost:11434/api/generate`)
-- `DEFAULT_MODEL` — default model used when `model` is not specified (`llama3.2:3b`)
+- `DEFAULT_MODEL` — default model used when `model` is not specified (`qwen2.5:7b`)
 
 ## Endpoints
 

@@ -4,7 +4,7 @@
 Uso do Ollama rodando localmente, sem dependência de API cloud (OpenAI, Anthropic, etc.).
 
 ## Modelo padrão
-`llama3.2:3b` como modelo default — leve o suficiente para rodar local.
+`qwen2.5:7b` como modelo default, escolhido por benchmark local de latencia x acuracia.
 
 ## System prompt sem persistência
 O system prompt fica em memória (`system_prompt.py`). Reiniciar o container reseta para o padrão. Persistência não foi adicionada intencionalmente.

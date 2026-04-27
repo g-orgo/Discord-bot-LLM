@@ -18,7 +18,7 @@ Python · FastAPI · Ollama · httpx · uvicorn
 pip install -r requirements.txt
 
 # Pull the default model
-ollama pull llama3.2:3b
+ollama pull qwen2.5:7b
 
 # Start Ollama (if not running as a service)
 ollama serve
@@ -45,7 +45,7 @@ Interactive docs (Swagger UI): `http://localhost:8000/docs`
 | `CORS_ORIGIN` | `http://localhost:5173` | Allowed CORS origin |
 | `OLLAMA_TIMEOUT` | `120.0` | Request timeout in seconds |
 | `OLLAMA_PULL_TIMEOUT` | `600.0` | Model pull timeout in seconds |
-| `DEFAULT_MODEL` | `llama3.2:3b` | Default Ollama model (hardcoded in `config.py`) |
+| `DEFAULT_MODEL` | `qwen2.5:7b` | Default Ollama model (hardcoded in `config.py`) |
 
 ## Endpoints
 
@@ -61,14 +61,14 @@ Generic LLM generation — sends a raw prompt directly to Ollama.
 ```json
 {
   "prompt": "Olá! Quem é você?",
-  "model": "llama3.2:3b"
+  "model": "qwen2.5:7b"
 }
 ```
 
 **Response:**
 ```json
 {
-  "model": "llama3.2:3b",
+  "model": "qwen2.5:7b",
   "response": "Olá! Sou um assistente de IA..."
 }
 ```
@@ -82,14 +82,14 @@ Chat endpoint used by the Discord bot's `/ask` command and the web frontend. Pre
 ```json
 {
   "message": "How do I stay motivated?",
-  "model": "llama3.2:3b"
+  "model": "qwen2.5:7b"
 }
 ```
 
 **Response:**
 ```json
 {
-  "model": "llama3.2:3b",
+  "model": "qwen2.5:7b",
   "response": "Staying motivated is all about..."
 }
 ```
@@ -103,7 +103,7 @@ Streaming version of `/chat`. Returns a `text/event-stream` response where each 
 data: {"token": "Staying"}
 data: {"token": " motivated"}
 ...
-data: {"done": true, "model": "llama3.2:3b"}
+data: {"done": true, "model": "qwen2.5:7b"}
 ```
 
 ---
