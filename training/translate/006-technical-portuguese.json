@@ -1,0 +1,6 @@
+{
+  "input": "Não consigo acessar o sistema. Está dando erro 403.",
+  "output": "I can't access the system. It's showing a 403 error.",
+  "source_language": "Portuguese",
+  "notes": "Technical message in Portuguese. Preserve technical terms (403) as-is."
+}

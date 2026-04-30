@@ -1,0 +1,7 @@
+{
+  "title": "Team feedback → LinkedIn appreciation post",
+  "user_request": "Nossa equipe trabalhou muito bem juntos nesse projeto",
+  "expected_output": "Great things happen when great people work together. This project was a true testament to what collaborative effort, trust, and shared vision can achieve. Proud of every single person on this team.",
+  "notes": "Team praise in Portuguese. Output must be warm, inclusive, celebratory but professional LinkedIn style.",
+  "source": "seed"
+}

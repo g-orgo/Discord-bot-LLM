@@ -1,0 +1,6 @@
+{
+  "input": "Já terminei minha parte. Pode revisar quando puder.",
+  "output": "I'm done with my part. You can review it when you get a chance.",
+  "source_language": "Portuguese",
+  "notes": "Casual team coordination message. Output: natural, relaxed English."
+}

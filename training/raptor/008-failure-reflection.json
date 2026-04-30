@@ -1,0 +1,7 @@
+{
+  "title": "Failure reflection → LinkedIn English post",
+  "user_request": "O projeto que lideramos falhou e precisamos recomeçar do zero",
+  "expected_output": "We failed. And I mean that with full ownership — no excuses, no blame-shifting. The project didn't deliver what we promised. Now we're rebuilding from scratch, and honestly? It's the best thing that could have happened. Failure without reflection is just waste. Failure with it? That's your next edge.",
+  "notes": "Input: Portuguese, honest failure context. Output: English, vulnerable and powerful LinkedIn tone. Show accountability without self-pity.",
+  "source": "seed"
+}

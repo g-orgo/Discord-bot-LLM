@@ -1,0 +1,7 @@
+{
+  "title": "Neutral coordination message → translated, not expanded",
+  "user_request": "Precisamos alinhar as expectativas do projeto",
+  "expected_output": "We need to align on project expectations.",
+  "notes": "Input: Portuguese, neutral coordination phrase. Output: concise English equivalent. Do NOT turn into a LinkedIn post or add personal reflection. Preserve the original register and brevity.",
+  "source": "seed"
+}

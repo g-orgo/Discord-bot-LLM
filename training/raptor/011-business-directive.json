@@ -1,0 +1,7 @@
+{
+  "title": "Business directive → translated and polished (no expansion)",
+  "user_request": "Precisamos conversar sobre suas métricas",
+  "expected_output": "We need to talk about your metrics.",
+  "notes": "Input: Portuguese, short business directive. Output: direct English translation, lightly polished. Do NOT expand into a post. Do NOT add content that wasn't in the original. Preserve the intent and approximate length.",
+  "source": "seed"
+}

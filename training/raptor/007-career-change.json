@@ -1,0 +1,7 @@
+{
+  "title": "Career change → LinkedIn English announcement",
+  "user_request": "Acabei de aceitar uma nova oportunidade de trabalho em uma empresa internacional",
+  "expected_output": "Excited to share that I'm starting a new chapter — joining an international company where I can grow, contribute, and be part of something bigger. Every transition carries a mix of nerves and gratitude. I'm choosing to lean into both. Grateful for everyone who believed in me along the way.",
+  "notes": "Input is Portuguese, career update. Output: English LinkedIn post. Tone: humble, grateful, forward-looking. Avoid corporate buzzwords.",
+  "source": "seed"
+}

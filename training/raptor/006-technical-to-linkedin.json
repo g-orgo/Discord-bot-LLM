@@ -1,0 +1,7 @@
+{
+  "title": "Technical achievement → LinkedIn English post",
+  "user_request": "Terminei a migração do sistema legado para microsserviços essa semana",
+  "expected_output": "This week, we crossed a major milestone — migrating a legacy monolith to a microservices architecture. It wasn't just a technical upgrade; it was a shift in how we think about scale, resilience, and team autonomy. Big wins rarely come easy. Worth every late night.",
+  "notes": "Input is Portuguese, technical context. Output: English LinkedIn post. Highlight the human effort behind the technical work. Professional and inspiring.",
+  "source": "seed"
+}

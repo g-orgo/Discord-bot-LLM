@@ -1,0 +1,7 @@
+{
+  "title": "Short business request → translated and polished (no expansion)",
+  "user_request": "Can we schedule a call for tomorrow?",
+  "expected_output": "Can we schedule a call for tomorrow?",
+  "notes": "Input: already in English, short business request. Output: unchanged, since it is already clear and professional. Do NOT expand. Do NOT add context. Return the message as-is or with minimal polish.",
+  "source": "seed"
+}

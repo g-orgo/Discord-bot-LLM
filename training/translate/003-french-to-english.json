@@ -1,0 +1,6 @@
+{
+  "input": "Bonjour, je voulais vous demander si vous êtes disponible demain.",
+  "output": "Hello, I wanted to ask if you are available tomorrow.",
+  "source_language": "French",
+  "notes": "Polite French inquiry. Output: keep the polite register in English."
+}

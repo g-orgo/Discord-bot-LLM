@@ -1,0 +1,6 @@
+{
+  "input": "Hola, ¿cómo estás? Espero que todo vaya bien.",
+  "output": "Hi, how are you? I hope everything is going well.",
+  "source_language": "Spanish",
+  "notes": "Casual Spanish greeting. Output: natural English, preserve informal tone."
+}

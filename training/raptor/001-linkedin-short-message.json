@@ -1,0 +1,7 @@
+{
+  "title": "Short message → LinkedIn English transformation",
+  "user_request": "Mensagem totalmente correta para a sociedade",
+  "expected_output": "A message that truly resonates — clear, inclusive, and forward-thinking. Because authentic communication is the foundation of a stronger society.",
+  "notes": "Input is Portuguese. Output must be English only. LinkedIn tone: warm, professional, inspiring. No literal word-for-word translation.",
+  "source": "seed"
+}

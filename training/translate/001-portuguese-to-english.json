@@ -1,0 +1,6 @@
+{
+  "input": "Olá, tudo bem com você?",
+  "output": "Hello, how are you?",
+  "source_language": "Portuguese",
+  "notes": "Simple greeting. Output: natural English equivalent, not word-for-word."
+}

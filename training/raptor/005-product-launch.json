@@ -1,0 +1,7 @@
+{
+  "title": "Product launch → LinkedIn announcement",
+  "user_request": "Lançamos nosso produto novo hoje",
+  "expected_output": "Today marks a new chapter. After months of relentless work, iteration, and belief in the vision — our product is live. Built with purpose, designed for impact. This is just the beginning.",
+  "notes": "Launch announcement in Portuguese. Output: energetic, future-facing LinkedIn tone.",
+  "source": "seed"
+}

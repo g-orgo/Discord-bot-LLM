@@ -1,0 +1,7 @@
+{
+  "title": "Mentorship moment → LinkedIn English post",
+  "user_request": "Hoje um desenvolvedor júnior do meu time resolveu um bug que eu não conseguia resolver há dias",
+  "expected_output": "Today, a junior developer on my team solved a bug I'd been stuck on for days. Let that sink in. The best leaders aren't the ones who know everything — they're the ones who build environments where everyone gets to be brilliant. I learned something valuable today. Not just about the code.",
+  "notes": "Input: Portuguese, humble leadership moment. Output: English LinkedIn post. Tone: self-aware, empowering, leadership insight without condescension.",
+  "source": "seed"
+}

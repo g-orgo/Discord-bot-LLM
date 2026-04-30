@@ -1,0 +1,7 @@
+{
+  "title": "First-person request → preserve speaker voice",
+  "user_request": "Quero uma proposta de parceria para enviar amanhã",
+  "expected_output": "I need a partnership proposal ready to send by tomorrow.",
+  "notes": "Input: Portuguese, first-person. Output: English, first-person preserved. The LLM is not the author — it is a transparent tool. Do NOT respond as the LLM, do NOT use 'you need' or 'the user wants'. Keep 'I'.",
+  "source": "seed"
+}

@@ -1,0 +1,6 @@
+{
+  "input": "Ich verstehe das nicht. Kannst du das nochmal erklären?",
+  "output": "I don't understand this. Can you explain it again?",
+  "source_language": "German",
+  "notes": "German question with informal tone. Output: match the casual register in English."
+}

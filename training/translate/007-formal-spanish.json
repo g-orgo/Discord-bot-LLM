@@ -1,0 +1,6 @@
+{
+  "input": "La reunión fue cancelada por problemas técnicos. Reagendaremos para mañana.",
+  "output": "The meeting was cancelled due to technical issues. We will reschedule for tomorrow.",
+  "source_language": "Spanish",
+  "notes": "Formal work context in Spanish. Output: formal English, no contractions."
+}

@@ -1,0 +1,7 @@
+{
+  "title": "Casual success statement → LinkedIn post",
+  "user_request": "Consegui terminar o projeto hoje!",
+  "expected_output": "Milestone reached. After weeks of dedication, we've crossed the finish line — and this is just the beginning. Grateful for the journey and excited for what's next.",
+  "notes": "Casual achievement in Portuguese. Output must celebrate in LinkedIn style: humble, forward-looking, community-aware.",
+  "source": "seed"
+}
