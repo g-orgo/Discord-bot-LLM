@@ -6,6 +6,9 @@ from config import CORS_ORIGIN, OLLAMA_BASE_URL, DEFAULT_MODEL, OLLAMA_PULL_TIME
 from routes.generate import router as generate_router
 from routes.chat import router as chat_router
 from routes.system_prompt import router as system_prompt_router
+from routes.translate import router as translate_router
+from routes.benchmark import router as benchmark_router
+import ollama as ollama_client
 
 
 async def _ensure_model() -> None:
@@ -33,10 +36,22 @@ async def _ensure_model() -> None:
     print(f"[startup] WARNING: Could not ensure model '{DEFAULT_MODEL}' after {max_attempts} attempts.")
 
 
+async def _warmup_model() -> None:
+    try:
+        print(f"[startup] Warming up model '{DEFAULT_MODEL}' into memory...")
+        await ollama_client.ollama_chat(DEFAULT_MODEL, "You are a helpful assistant.", "hi")
+        print(f"[startup] Model '{DEFAULT_MODEL}' is warm and ready.")
+    except Exception as exc:
+        print(f"[startup] WARNING: Warm-up failed (first user request may be slow): {exc}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    ollama_client.init_client()
     await _ensure_model()
+    await _warmup_model()
     yield
+    await ollama_client.close_client()
 
 
 app = FastAPI(title="Raptor LLM", description="A translation layer and Brand communication tool for Discord channels with a web application interface.", lifespan=lifespan)
@@ -51,6 +66,8 @@ app.add_middleware(
 app.include_router(generate_router)
 app.include_router(chat_router)
 app.include_router(system_prompt_router)
+app.include_router(translate_router)
+app.include_router(benchmark_router)
 
 
 @app.get("/")
