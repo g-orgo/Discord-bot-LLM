@@ -24,3 +24,13 @@ class ChatResponse(BaseModel):
 
 class SystemPromptUpdate(BaseModel):
     prompt: str
+
+
+class TranslateRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=10000)
+    model: str = DEFAULT_MODEL
+
+
+class TranslateResponse(BaseModel):
+    model: str
+    response: str
