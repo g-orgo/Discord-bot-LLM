@@ -1,6 +1,6 @@
 """Integration tests for FastAPI routes with mocked Ollama."""
-import pytest
 from unittest.mock import AsyncMock, patch
+import httpx
 from fastapi.testclient import TestClient
 from main import app
 
@@ -36,18 +36,44 @@ def test_put_system_prompt_allows_empty_string():
 
 
 # ── /chat (mocked Ollama) ─────────────────────────────────────
-@patch("routes.chat.ollama_generate", new_callable=AsyncMock)
-def test_chat_returns_response(mock_generate):
-    mock_generate.return_value = "I'm doing well!"
+@patch("routes.chat._translate_message", new_callable=AsyncMock)
+@patch("routes.chat._context_gate_response", new_callable=AsyncMock)
+@patch("routes.chat._linkedinfy_message", new_callable=AsyncMock)
+def test_chat_returns_response(mock_linkedinfy, mock_context_gate, mock_translate):
+    mock_linkedinfy.return_value = "How are you?"
+    mock_context_gate.return_value = "How are you?"
+    mock_translate.return_value = "I'm doing well!"
 
     res = client.post("/chat", json={"message": "How are you?"})
     assert res.status_code == 200
     assert res.json()["response"] == "I'm doing well!"
     assert "model" in res.json()
+    mock_linkedinfy.assert_awaited_once()
+    mock_context_gate.assert_awaited_once()
+    mock_translate.assert_awaited_once()
 
 
-@patch("routes.chat.ollama_generate", new_callable=AsyncMock)
-def test_chat_rejects_empty_message(mock_generate):
+@patch("routes.chat._translate_message", new_callable=AsyncMock)
+@patch("routes.chat._context_gate_response", new_callable=AsyncMock)
+@patch("routes.chat.ollama_chat", new_callable=AsyncMock)
+def test_chat_retries_transient_http_500(mock_ollama_chat, mock_context_gate, mock_translate):
+    request = httpx.Request("POST", "http://ollama.local/api/chat")
+    response = httpx.Response(500, request=request)
+    mock_ollama_chat.side_effect = [
+        httpx.HTTPStatusError("internal", request=request, response=response),
+        "I'm doing well!",
+    ]
+    mock_context_gate.return_value = "I'm doing well!"
+    mock_translate.return_value = "I'm doing well!"
+
+    res = client.post("/chat", json={"message": "How are you?"})
+
+    assert res.status_code == 200
+    assert res.json()["response"] == "I'm doing well!"
+    assert mock_ollama_chat.await_count == 2
+
+
+def test_chat_rejects_empty_message():
     res = client.post("/chat", json={"message": ""})
     assert res.status_code == 422  # Pydantic validation
 
