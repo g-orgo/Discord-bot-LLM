@@ -118,7 +118,7 @@ data: {"done":true,"model":"qwen2.5:7b"}
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OLLAMA_URL` | `http://localhost:11434/api/generate` | Ollama endpoint |
-| `DEFAULT_MODEL` | `qwen2.5:7b` | Default model for requests |
+| `DEFAULT_MODEL` | `qwen2.5:1.5b` | Default model for requests |
 | `OLLAMA_TIMEOUT` | `120.0` | Generation timeout (seconds) |
 | `OLLAMA_PULL_TIMEOUT` | `600.0` | Model pull timeout (seconds) |
 | `CORS_ORIGIN` | `http://localhost:5173` | Allowed CORS origin (Vite dev server) |
@@ -128,7 +128,7 @@ data: {"done":true,"model":"qwen2.5:7b"}
 
 ```
 OLLAMA_URL=http://ollama-service:11434/api/generate
-DEFAULT_MODEL=qwen2.5:7b
+DEFAULT_MODEL=qwen2.5:1.5b
 OLLAMA_TIMEOUT=180.0
 CORS_ORIGIN=https://your-domain.com
 ```
@@ -142,7 +142,7 @@ CORS_ORIGIN=https://your-domain.com
 The server auto-pulls the default model if missing. If it fails:
 
 ```bash
-ollama pull qwen2.5:7b
+ollama pull qwen2.5:1.5b
 ```
 
 ### Slow Responses

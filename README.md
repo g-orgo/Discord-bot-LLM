@@ -18,7 +18,7 @@ Python · FastAPI · Ollama · httpx · uvicorn
 pip install -r requirements.txt
 
 # Pull the default model
-ollama pull qwen2.5:7b
+ollama pull qwen2.5:1.5b
 
 # Start Ollama (if not running as a service)
 ollama serve
@@ -43,9 +43,16 @@ Interactive docs (Swagger UI): `http://localhost:8000/docs`
 |----------|---------|-------------|
 | `OLLAMA_URL` | `http://localhost:11434/api/generate` | Ollama generate endpoint |
 | `CORS_ORIGIN` | `http://localhost:5173` | Allowed CORS origin |
-| `OLLAMA_TIMEOUT` | `120.0` | Request timeout in seconds |
+| `OLLAMA_TIMEOUT` | `300.0` | Request timeout in seconds |
 | `OLLAMA_PULL_TIMEOUT` | `600.0` | Model pull timeout in seconds |
-| `DEFAULT_MODEL` | `qwen2.5:7b` | Default Ollama model (hardcoded in `config.py`) |
+| `OLLAMA_KEEP_ALIVE` | `5m` | How long Ollama keeps the model loaded between requests |
+| `OLLAMA_LOW_VRAM` | `true` | Enables Ollama low-VRAM mode in request options |
+| `DEFAULT_MODEL` | `qwen2.5:1.5b` | Default Ollama model |
+| `NUM_PREDICT` | `80` | Max generated tokens per request |
+| `NUM_CTX` | `1024` | Context window used in Ollama options |
+| `TRANSLATE_EXAMPLES_LIMIT` | `2` | Max few-shot examples injected in translation prompt |
+| `CHAT_ENABLE_CONTEXT_GATE` | `false` | Enables extra context-gate pass in `/chat` (higher latency) |
+| `CHAT_MIN_ALTERNATIVES` | `1` | Minimum alternatives before forced regeneration in `/chat` |
 
 ## Endpoints
 
@@ -76,7 +83,7 @@ Generic LLM generation — sends a raw prompt directly to Ollama.
 ---
 
 ### `POST /chat`
-Chat endpoint used by the Discord bot's `/ask` command and the web frontend. Prepends the active system prompt to the message before calling Ollama.
+Chat endpoint used by the Discord bot and the web frontend. It now runs the primary pipeline in this order: linkedinfy rewrite -> context gate -> translation.
 
 **Body:**
 ```json
@@ -108,6 +115,17 @@ data: {"done": true, "model": "qwen2.5:7b"}
 
 ---
 
+### `GET /benchmark`
+Runs a latency/token benchmark directly against Ollama chat.
+
+**Query params:**
+- `model` (optional): model alias (default: `DEFAULT_MODEL`)
+- `runs` (optional): measured runs (default: `3`)
+- `warmup_runs` (optional): non-measured warmups (default: `1`)
+- `message` (optional): benchmark prompt
+
+---
+
 ### `GET /system-prompt`
 Returns the current system prompt.
 
@@ -125,6 +143,25 @@ Updates the active system prompt (in-memory, resets on server restart).
 ```json
 { "prompt": "You are a pirate assistant. Respond only in pirate speak." }
 ```
+
+---
+
+### `POST /chat/pipeline/linkedinfy`
+Runs only the primary linkedinfy rewrite stage.
+
+### `POST /chat/pipeline/context-gate`
+Runs the context gate against the original message and a candidate rewrite.
+
+### `POST /chat/pipeline/translate`
+Translates the primary rewrite when needed.
+
+### `POST /chat/pipeline/suggestions`
+Generates raw alternative suggestions after the primary message is ready.
+
+### `POST /chat/pipeline/suggestions/finalize`
+Applies context gate + translation to the additional suggestions so the bot can present polished final options.
+
+These staged endpoints exist so the Discord bot can keep a single visible message updated through the pipeline and stop early after the primary translation when the user does not need extra suggestions.
 
 **Response:**
 ```json
