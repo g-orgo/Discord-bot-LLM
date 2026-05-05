@@ -7,9 +7,6 @@ from schemas import (
     ChatRequest,
     ChatResponse,
     ContextGateRequest,
-    SuggestionsRequest,
-    SuggestionsFinalizeRequest,
-    SuggestionsResponse,
     TranslateRequest,
     TranslateResponse,
 )
@@ -113,10 +110,10 @@ def _split_or_alternatives(text: str) -> list[str]:
     return unique
 
 
-async def _ollama_chat_with_retry(model: str, system: str, user: str) -> str:
+async def _ollama_chat_with_retry(model: str, system: str, user: str, few_shot: list[dict] | None = None) -> str:
     for attempt in range(1, CHAT_RETRY_ATTEMPTS + 1):
         try:
-            return await ollama_chat(model, system, user)
+            return await ollama_chat(model, system, user, few_shot=few_shot)
         except httpx.HTTPStatusError as exc:
             status_code = exc.response.status_code if exc.response else None
             retryable = status_code in _RETRYABLE_STATUS_CODES
@@ -170,7 +167,8 @@ async def _context_gate_response(
 
 
 async def _linkedinfy_message(model: str, message: str) -> str:
-    response = await _ollama_chat_with_retry(model, system_prompt.get(), message)
+    prefixed_message = f"Rewrite: {message}"
+    response = await _ollama_chat_with_retry(model, system_prompt.get(), prefixed_message, few_shot=system_prompt.get_few_shot())
     return response.strip() or message
 
 
@@ -201,12 +199,11 @@ async def _finalize_alternative_messages(model: str, original_message: str, sugg
 
     for suggestion in suggestions:
         gated = await _context_gate_response(model, original_message, suggestion)
-        translated = await _translate_message(model, gated)
-        key = translated.lower()
+        key = gated.lower()
         if key in seen:
             continue
         seen.add(key)
-        finalized.append(translated)
+        finalized.append(gated)
 
     return finalized
 
@@ -225,8 +222,7 @@ router = APIRouter()
 async def chat(request: ChatRequest):
     try:
         linked = await _linkedinfy_message(request.model, request.message)
-        gated = await _context_gate_response(request.model, request.message, linked)
-        response = await _translate_message(request.model, gated)
+        response = await _context_gate_response(request.model, request.message, linked)
 
         if CHAT_ENABLE_CONTEXT_GATE and CHAT_MIN_ALTERNATIVES > 1 and _count_or_alternatives(response) < CHAT_MIN_ALTERNATIVES:
             alternatives = await _generate_alternative_messages(request.model, request.message, response)
@@ -266,34 +262,14 @@ async def chat_pipeline_translate(request: TranslateRequest):
     return TranslateResponse(model=request.model, response=response)
 
 
-@router.post("/chat/pipeline/suggestions", response_model=SuggestionsResponse)
-async def chat_pipeline_suggestions(request: SuggestionsRequest):
-    try:
-        suggestions = await _generate_alternative_messages(request.model, request.original_message, request.primary_message)
-    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
-        raise _map_pipeline_error(exc)
-    return SuggestionsResponse(model=request.model, suggestions=suggestions)
-
-
-@router.post("/chat/pipeline/suggestions/finalize", response_model=SuggestionsResponse)
-async def chat_pipeline_finalize_suggestions(request: SuggestionsFinalizeRequest):
-    try:
-        suggestions = await _finalize_alternative_messages(request.model, request.original_message, request.suggestions)
-    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
-        raise _map_pipeline_error(exc)
-    return SuggestionsResponse(model=request.model, suggestions=suggestions)
-
-
 @router.post("/chat/stream")
 async def chat_stream(request: ChatRequest):
     try:
-        translated = await _translate_message(request.model, request.message)
+        async def event_stream():
+            async for token in ollama_chat_stream(request.model, system_prompt.get(), request.message):
+                yield f"data: {json.dumps({'token': token})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'model': request.model})}\n\n"
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
     except (httpx.HTTPStatusError, httpx.RequestError) as exc:
         raise _map_pipeline_error(exc)
-
-    async def event_stream():
-        async for token in ollama_chat_stream(request.model, system_prompt.get(), translated):
-            yield f"data: {json.dumps({'token': token})}\n\n"
-        yield f"data: {json.dumps({'done': True, 'model': request.model})}\n\n"
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream")

@@ -1,0 +1,7 @@
+{
+  "title": "Feedback message in Portuguese → reformulate in Portuguese",
+  "user_request": "o trabalho do João não ficou bom essa semana",
+  "expected_output": "O trabalho do João não atingiu o padrão esperado esta semana.",
+  "notes": "Portuguese input stays Portuguese. More professional tone.",
+  "source": "correction"
+}

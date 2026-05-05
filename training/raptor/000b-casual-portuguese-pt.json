@@ -1,0 +1,7 @@
+{
+  "title": "Portuguese casual message → reformulate in Portuguese with clarity",
+  "user_request": "Rewrite: Preciso conversar com você sobre um negócio",
+  "expected_output": "Preciso conversar com você sobre uma oportunidade de negócio.",
+  "notes": "Portuguese input stays Portuguese. No translation.",
+  "source": "correction"
+}

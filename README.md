@@ -155,12 +155,6 @@ Runs the context gate against the original message and a candidate rewrite.
 ### `POST /chat/pipeline/translate`
 Translates the primary rewrite when needed.
 
-### `POST /chat/pipeline/suggestions`
-Generates raw alternative suggestions after the primary message is ready.
-
-### `POST /chat/pipeline/suggestions/finalize`
-Applies context gate + translation to the additional suggestions so the bot can present polished final options.
-
 These staged endpoints exist so the Discord bot can keep a single visible message updated through the pipeline and stop early after the primary translation when the user does not need extra suggestions.
 
 **Response:**

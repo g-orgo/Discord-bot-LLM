@@ -1,0 +1,7 @@
+{
+  "title": "Meeting coordination in Portuguese → reformulate in Portuguese",
+  "user_request": "Rewrite: Precisamos de uma reunião essa semana pra alinhar o projeto",
+  "expected_output": "Precisamos agendar uma reunião esta semana para alinhar o projeto.",
+  "notes": "Portuguese input stays Portuguese. Improve grammar and formality only.",
+  "source": "correction"
+}

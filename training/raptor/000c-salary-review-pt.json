@@ -1,0 +1,7 @@
+{
+  "title": "Portuguese informal input → professional Portuguese",
+  "user_request": "Rewrite: Quero falar com o chefe sobre aumento",
+  "expected_output": "Gostaria de conversar com você sobre uma revisão salarial.",
+  "notes": "Transform tone, keep Portuguese. No new content.",
+  "source": "correction"
+}

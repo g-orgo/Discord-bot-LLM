@@ -1,0 +1,7 @@
+{
+  "title": "Simple statement about a family presentation → preserve literally",
+  "user_request": "Rewrite: Estou em uma apresentação para o papai",
+  "expected_output": "Estou dando uma apresentação para meu pai.",
+  "notes": "Portuguese input stays Portuguese. Keep first person. No translation.",
+  "source": "correction"
+}
