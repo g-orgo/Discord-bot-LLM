@@ -1,9 +1,19 @@
 import httpx
 import json
-from config import OLLAMA_URL, OLLAMA_CHAT_URL, OLLAMA_TIMEOUT, NUM_PREDICT, NUM_CTX
+from config import (
+    OLLAMA_URL,
+    OLLAMA_CHAT_URL,
+    OLLAMA_TIMEOUT,
+    OLLAMA_KEEP_ALIVE,
+    OLLAMA_LOW_VRAM,
+    NUM_PREDICT,
+    NUM_CTX,
+)
 from typing import AsyncGenerator
 
 _OLLAMA_OPTIONS = {"num_predict": NUM_PREDICT, "num_ctx": NUM_CTX}
+if OLLAMA_LOW_VRAM:
+    _OLLAMA_OPTIONS["low_vram"] = True
 
 # Persistent client — initialized once at startup, reused across all requests.
 _client: httpx.AsyncClient | None = None
@@ -11,7 +21,8 @@ _client: httpx.AsyncClient | None = None
 
 def init_client() -> None:
     global _client
-    _client = httpx.AsyncClient(timeout=OLLAMA_TIMEOUT)
+    timeout = httpx.Timeout(connect=10.0, read=OLLAMA_TIMEOUT, write=30.0, pool=30.0)
+    _client = httpx.AsyncClient(timeout=timeout)
 
 
 async def close_client() -> None:
@@ -28,7 +39,7 @@ def _get_client() -> httpx.AsyncClient:
 
 
 async def ollama_generate(model: str, prompt: str) -> str:
-    payload = {"model": model, "prompt": prompt, "stream": False, "keep_alive": "24h", "options": _OLLAMA_OPTIONS}
+    payload = {"model": model, "prompt": prompt, "stream": False, "keep_alive": OLLAMA_KEEP_ALIVE, "options": _OLLAMA_OPTIONS}
     res = await _get_client().post(OLLAMA_URL, json=payload)
     res.raise_for_status()
     return res.json()["response"]
@@ -42,7 +53,7 @@ async def ollama_chat(model: str, system: str, user: str) -> str:
             {"role": "user", "content": user},
         ],
         "stream": False,
-        "keep_alive": "24h",
+        "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": _OLLAMA_OPTIONS,
     }
     res = await _get_client().post(OLLAMA_CHAT_URL, json=payload)
@@ -58,7 +69,7 @@ async def ollama_chat_stream(model: str, system: str, user: str) -> AsyncGenerat
             {"role": "user", "content": user},
         ],
         "stream": True,
-        "keep_alive": "24h",
+        "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": _OLLAMA_OPTIONS,
     }
     async with _get_client().stream("POST", OLLAMA_CHAT_URL, json=payload) as response:
@@ -72,7 +83,7 @@ async def ollama_chat_stream(model: str, system: str, user: str) -> AsyncGenerat
 
 
 async def ollama_generate_stream(model: str, prompt: str) -> AsyncGenerator[str, None]:
-    payload = {"model": model, "prompt": prompt, "stream": True, "keep_alive": "24h", "options": _OLLAMA_OPTIONS}
+    payload = {"model": model, "prompt": prompt, "stream": True, "keep_alive": OLLAMA_KEEP_ALIVE, "options": _OLLAMA_OPTIONS}
     async with _get_client().stream("POST", OLLAMA_URL, json=payload) as response:
         response.raise_for_status()
         async for line in response.aiter_lines():

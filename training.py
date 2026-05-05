@@ -34,7 +34,7 @@ def load_examples() -> str:
     return f"\n\nHere are reference examples of correct transformations:\n\n{block}"
 
 
-def load_translate_examples() -> str:
+def load_translate_examples(max_examples: int | None = None) -> str:
     """Return a formatted few-shot block from training/translate/, sorted by filename."""
     training_dir = _BASE_DIR / "translate"
     if not training_dir.exists():
@@ -50,6 +50,9 @@ def load_translate_examples() -> str:
                 examples.append(f'Input: "{inp}"\nOutput: "{out}"')
         except Exception:
             pass
+
+        if max_examples is not None and max_examples > 0 and len(examples) >= max_examples:
+            break
 
     if not examples:
         return ""

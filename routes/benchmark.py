@@ -23,20 +23,27 @@ class BenchmarkRun(BaseModel):
 class BenchmarkResponse(BaseModel):
     model: str
     runs: int
+    warmup_runs: int
     results: list[BenchmarkRun]
     avg_request_ms: float
     min_request_ms: float
     max_request_ms: float
     avg_tokens_per_second: float
+    options: dict[str, int]
 
 
 @router.get("/benchmark", response_model=BenchmarkResponse)
-async def benchmark(runs: int = Query(default=3, ge=1, le=10)):
+async def benchmark(
+    runs: int = Query(default=3, ge=1, le=20),
+    model: str = Query(default=DEFAULT_MODEL),
+    warmup_runs: int = Query(default=1, ge=0, le=5),
+    message: str = Query(default=_BENCHMARK_MESSAGE, min_length=1, max_length=1000),
+):
     payload = {
-        "model": DEFAULT_MODEL,
+        "model": model,
         "messages": [
             {"role": "system", "content": system_prompt.get()},
-            {"role": "user", "content": _BENCHMARK_MESSAGE},
+            {"role": "user", "content": message},
         ],
         "stream": False,
         "keep_alive": -1,
@@ -45,6 +52,10 @@ async def benchmark(runs: int = Query(default=3, ge=1, le=10)):
 
     results: list[BenchmarkRun] = []
     client = _get_client()
+
+    for _ in range(warmup_runs):
+        res = await client.post(OLLAMA_CHAT_URL, json=payload)
+        res.raise_for_status()
 
     for _ in range(runs):
         t0 = time.perf_counter()
@@ -74,11 +85,13 @@ async def benchmark(runs: int = Query(default=3, ge=1, le=10)):
     tps_values = [r.tokens_per_second for r in results]
 
     return BenchmarkResponse(
-        model=DEFAULT_MODEL,
+        model=model,
         runs=runs,
+        warmup_runs=warmup_runs,
         results=results,
         avg_request_ms=round(sum(request_times) / len(request_times), 1),
         min_request_ms=round(min(request_times), 1),
         max_request_ms=round(max(request_times), 1),
         avg_tokens_per_second=round(sum(tps_values) / len(tps_values), 1),
+        options=_OLLAMA_OPTIONS,
     )
