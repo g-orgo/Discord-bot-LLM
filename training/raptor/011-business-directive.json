@@ -1,7 +1,7 @@
 {
-  "title": "Business directive → translated and polished (no expansion)",
+  "title": "Business directive aimed at a third party → translate only",
   "user_request": "Precisamos conversar sobre suas métricas",
   "expected_output": "We need to talk about your metrics.",
-  "notes": "Input: Portuguese, short business directive. Output: direct English translation, lightly polished. Do NOT expand into a post. Do NOT add content that wasn't in the original. Preserve the intent and approximate length.",
+  "notes": "This message is from the user TO a third party. It is not addressed to the LLM. Output is a clean English translation — no expansion, no questions, no interpretation. The LLM is a silent relay.",
   "source": "seed"
 }

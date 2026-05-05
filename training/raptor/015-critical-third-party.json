@@ -1,0 +1,7 @@
+{
+  "title": "Critical message to a team → translate only, never interpret as self-directed",
+  "user_request": "Precisamos conversar sobre métricas pois vocês estão mandando muito mal",
+  "expected_output": "We need to talk about metrics — the results have been really disappointing.",
+  "notes": "The user is writing to their team or a third party. The LLM is never the subject of this message. Do NOT respond conversationally. Do NOT ask what 'mandando muito mal' means. Simply translate and lightly polish. Silent relay.",
+  "source": "seed"
+}
