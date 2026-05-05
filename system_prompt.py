@@ -1,13 +1,16 @@
 import config as cfg
 from training import load_examples
 
-# Mutable reference held at module level so routes can read and update it.
-_prompt: list[str] = [cfg.SYSTEM_PROMPT + load_examples()]
+# Separate mutable base from immutable examples so PUT /system-prompt never
+# strips the few-shot training block.
+_base: list[str] = [cfg.SYSTEM_PROMPT]
+_examples: str = load_examples()
 
 
 def get() -> str:
-    return _prompt[0]
+    return _base[0] + _examples
 
 
 def set(value: str) -> None:
-    _prompt[0] = value
+    """Replace only the base instruction block; training examples are preserved."""
+    _base[0] = value

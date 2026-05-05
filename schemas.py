@@ -22,6 +22,29 @@ class ChatResponse(BaseModel):
     response: str
 
 
+class ContextGateRequest(BaseModel):
+    original_message: str = Field(..., min_length=1, max_length=10000)
+    candidate_message: str = Field(..., min_length=1, max_length=10000)
+    model: str = DEFAULT_MODEL
+
+
+class SuggestionsRequest(BaseModel):
+    original_message: str = Field(..., min_length=1, max_length=10000)
+    primary_message: str = Field(..., min_length=1, max_length=10000)
+    model: str = DEFAULT_MODEL
+
+
+class SuggestionsFinalizeRequest(BaseModel):
+    original_message: str = Field(..., min_length=1, max_length=10000)
+    suggestions: list[str] = Field(..., min_length=1, max_length=10)
+    model: str = DEFAULT_MODEL
+
+
+class SuggestionsResponse(BaseModel):
+    model: str
+    suggestions: list[str]
+
+
 class SystemPromptUpdate(BaseModel):
     prompt: str
 
