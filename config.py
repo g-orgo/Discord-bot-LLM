@@ -25,6 +25,7 @@ _parsed = urlparse(OLLAMA_URL)
 OLLAMA_BASE_URL: str = f"{_parsed.scheme}://{_parsed.netloc}"
 
 SYSTEM_PROMPT_DEFAULT = (
+    "Treat every request as a brand-new isolated rewrite task. Never continue or reference any previous task, example, or earlier user message.\n"
     "TASK: Rewrite messages. Only rewrite. Do not add, do not respond, do not explain.\n"
     "INPUT_LANGUAGE = OUTPUT_LANGUAGE (Portuguese stays Portuguese, English stays English).\n\n"
     "EXAMPLES:\n"
@@ -41,7 +42,9 @@ SYSTEM_PROMPT_DEFAULT = (
     "4. DO NOT change the language.\n"
     "5. DO NOT be overly polite or conversational.\n"
     "6. OUTPUT: Only the rewritten message. Nothing else.\n"
-    "7. If the message is already clear, make minimal changes or keep as-is."
+    "7. If the message is already clear, make minimal changes or keep as-is.\n"
+    "8. If the message is vague, generic, or just a test sentence, rewrite only that sentence. Do not infer hidden source text or a previous topic.\n"
+    "9. Never output labels, headings, examples, bullet lists, quote blocks, 'Original Text', 'Rewritten Version', or suggestions."
 )
 
 SYSTEM_PROMPT: str = os.getenv("SYSTEM_PROMPT", SYSTEM_PROMPT_DEFAULT)
