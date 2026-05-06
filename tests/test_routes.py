@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, patch
 import httpx
 from fastapi.testclient import TestClient
 from main import app
+from routes import chat as chat_routes
 
 client = TestClient(app)
 
@@ -36,13 +37,11 @@ def test_put_system_prompt_allows_empty_string():
 
 
 # ── /chat (mocked Ollama) ─────────────────────────────────────
-@patch("routes.chat._translate_message", new_callable=AsyncMock)
 @patch("routes.chat._context_gate_response", new_callable=AsyncMock)
 @patch("routes.chat._linkedinfy_message", new_callable=AsyncMock)
-def test_chat_returns_response(mock_linkedinfy, mock_context_gate, mock_translate):
+def test_chat_returns_response(mock_linkedinfy, mock_context_gate):
     mock_linkedinfy.return_value = "How are you?"
-    mock_context_gate.return_value = "How are you?"
-    mock_translate.return_value = "I'm doing well!"
+    mock_context_gate.return_value = "I'm doing well!"
 
     res = client.post("/chat", json={"message": "How are you?"})
     assert res.status_code == 200
@@ -50,13 +49,11 @@ def test_chat_returns_response(mock_linkedinfy, mock_context_gate, mock_translat
     assert "model" in res.json()
     mock_linkedinfy.assert_awaited_once()
     mock_context_gate.assert_awaited_once()
-    mock_translate.assert_awaited_once()
 
 
-@patch("routes.chat._translate_message", new_callable=AsyncMock)
 @patch("routes.chat._context_gate_response", new_callable=AsyncMock)
 @patch("routes.chat.ollama_chat", new_callable=AsyncMock)
-def test_chat_retries_transient_http_500(mock_ollama_chat, mock_context_gate, mock_translate):
+def test_chat_retries_transient_http_500(mock_ollama_chat, mock_context_gate):
     request = httpx.Request("POST", "http://ollama.local/api/chat")
     response = httpx.Response(500, request=request)
     mock_ollama_chat.side_effect = [
@@ -64,7 +61,6 @@ def test_chat_retries_transient_http_500(mock_ollama_chat, mock_context_gate, mo
         "I'm doing well!",
     ]
     mock_context_gate.return_value = "I'm doing well!"
-    mock_translate.return_value = "I'm doing well!"
 
     res = client.post("/chat", json={"message": "How are you?"})
 
@@ -76,6 +72,45 @@ def test_chat_retries_transient_http_500(mock_ollama_chat, mock_context_gate, mo
 def test_chat_rejects_empty_message():
     res = client.post("/chat", json={"message": ""})
     assert res.status_code == 422  # Pydantic validation
+
+
+@patch("routes.chat.ollama_chat", new_callable=AsyncMock)
+def test_linkedinfy_request_is_explicitly_isolated(mock_ollama_chat):
+    mock_ollama_chat.return_value = "Clean rewrite"
+
+    res = client.post("/chat/pipeline/linkedinfy", json={"message": "Agora um teste"})
+
+    assert res.status_code == 200
+    _, system_arg, user_arg = mock_ollama_chat.await_args.args[:3]
+    assert chat_routes._REQUEST_ISOLATION_RULE in system_arg
+    assert user_arg == "Rewrite: Agora um teste"
+
+
+def test_chat_stream_uses_same_isolated_rewrite_contract():
+    calls = []
+
+    async def fake_stream(model, system, user, few_shot=None):
+        calls.append({
+            "model": model,
+            "system": system,
+            "user": user,
+            "few_shot": few_shot,
+        })
+        yield "chunk-1"
+        yield "chunk-2"
+
+    with patch("routes.chat.ollama_chat_stream", new=fake_stream):
+        res = client.post("/chat/stream", json={"message": "Agora um teste"})
+
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("text/event-stream")
+    assert "chunk-1" in res.text
+    assert "chunk-2" in res.text
+    assert '"done": true' in res.text.lower()
+    assert len(calls) == 1
+    assert calls[0]["user"] == "Rewrite: Agora um teste"
+    assert chat_routes._REQUEST_ISOLATION_RULE in calls[0]["system"]
+    assert isinstance(calls[0]["few_shot"], list)
 
 
 # ── /generate (mocked Ollama) ─────────────────────────────────
