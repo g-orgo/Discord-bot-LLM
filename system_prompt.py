@@ -8,8 +8,12 @@ _examples: str = load_examples()
 _few_shot_messages: list[dict] = load_few_shot_messages()
 
 
+def get_base() -> str:
+    return _base[0]
+
+
 def get() -> str:
-    return _base[0] + _examples
+    return get_base() + _examples
 
 
 def get_few_shot() -> list[dict]:
