@@ -9,6 +9,9 @@ from pathlib import Path
 
 _BASE_DIR = Path(__file__).parent / "training"
 
+# Max few-shot message pairs to include in the messages array (for small models)
+_FEW_SHOT_LIMIT = 6
+
 
 def load_examples() -> str:
     """Return a formatted few-shot block from training/raptor/, sorted by filename."""
@@ -32,6 +35,33 @@ def load_examples() -> str:
 
     block = "\n\n".join(examples)
     return f"\n\nHere are reference examples of correct transformations:\n\n{block}"
+
+
+def load_few_shot_messages() -> list[dict]:
+    """Return few-shot examples as user/assistant message pairs.
+
+    Small models (< 3B) follow demonstrated examples far better than
+    written instructions alone. Sorted by filename; capped at _FEW_SHOT_LIMIT.
+    """
+    training_dir = _BASE_DIR / "raptor"
+    if not training_dir.exists():
+        return []
+
+    messages: list[dict] = []
+    for path in sorted(training_dir.glob("*.json")):
+        if len(messages) >= _FEW_SHOT_LIMIT * 2:
+            break
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            user_req = data.get("user_request", "").strip()
+            expected = data.get("expected_output", "").strip()
+            if user_req and expected:
+                messages.append({"role": "user", "content": user_req})
+                messages.append({"role": "assistant", "content": expected})
+        except Exception:
+            pass
+
+    return messages
 
 
 def load_translate_examples(max_examples: int | None = None) -> str:

@@ -12,6 +12,7 @@ from config import DEFAULT_MODEL, TRANSLATE_EXAMPLES_LIMIT
 logger = logging.getLogger(__name__)
 
 _TRANSLATE_SYSTEM = (
+    "Treat this request as fully isolated. Use only the current message. Do not continue or reuse any previous task or text.\n"
     "Task: detect language and translate to English when needed.\n"
     "Rules:\n"
     "1) If fully English, output exactly: ENGLISH\n"
@@ -22,6 +23,7 @@ _TRANSLATE_SYSTEM = (
 )
 
 _VALIDATE_TRANSLATION_SYSTEM = (
+    "Treat this request as fully isolated. Use only the current original message and candidate translation. "
     "You validate whether an English translation preserves the original message intent, emotional tone, and key facts. "
     "Return only the corrected English translation, with no explanations or labels. "
     "If the candidate translation is already faithful, return it unchanged."

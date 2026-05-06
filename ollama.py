@@ -11,7 +11,12 @@ from config import (
 )
 from typing import AsyncGenerator
 
-_OLLAMA_OPTIONS = {"num_predict": NUM_PREDICT, "num_ctx": NUM_CTX}
+_OLLAMA_OPTIONS = {
+    "num_predict": NUM_PREDICT, 
+    "num_ctx": NUM_CTX,
+    "temperature": 0.2,  # Lower temperature = less hallucination, more deterministic
+    "top_p": 0.1,        # Lower top_p = more restrictive sampling
+}
 if OLLAMA_LOW_VRAM:
     _OLLAMA_OPTIONS["low_vram"] = True
 
@@ -45,13 +50,14 @@ async def ollama_generate(model: str, prompt: str) -> str:
     return res.json()["response"]
 
 
-async def ollama_chat(model: str, system: str, user: str) -> str:
+async def ollama_chat(model: str, system: str, user: str, few_shot: list[dict] | None = None) -> str:
+    messages: list[dict] = [{"role": "system", "content": system}]
+    if few_shot:
+        messages.extend(few_shot)
+    messages.append({"role": "user", "content": user})
     payload = {
         "model": model,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        "messages": messages,
         "stream": False,
         "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": _OLLAMA_OPTIONS,
@@ -61,13 +67,14 @@ async def ollama_chat(model: str, system: str, user: str) -> str:
     return res.json()["message"]["content"]
 
 
-async def ollama_chat_stream(model: str, system: str, user: str) -> AsyncGenerator[str, None]:
+async def ollama_chat_stream(model: str, system: str, user: str, few_shot: list[dict] | None = None) -> AsyncGenerator[str, None]:
+    messages: list[dict] = [{"role": "system", "content": system}]
+    if few_shot:
+        messages.extend(few_shot)
+    messages.append({"role": "user", "content": user})
     payload = {
         "model": model,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        "messages": messages,
         "stream": True,
         "keep_alive": OLLAMA_KEEP_ALIVE,
         "options": _OLLAMA_OPTIONS,

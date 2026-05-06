@@ -7,10 +7,10 @@ router = APIRouter()
 
 @router.get("/system-prompt")
 def get_system_prompt():
-    return {"prompt": system_prompt.get()}
+    return {"prompt": system_prompt.get_base()}
 
 
 @router.put("/system-prompt")
 def update_system_prompt(body: SystemPromptUpdate):
     system_prompt.set(body.prompt)
-    return {"prompt": system_prompt.get()}
+    return {"prompt": system_prompt.get_base()}

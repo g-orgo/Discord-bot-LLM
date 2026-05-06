@@ -7,9 +7,6 @@ from schemas import (
     ChatRequest,
     ChatResponse,
     ContextGateRequest,
-    SuggestionsRequest,
-    SuggestionsFinalizeRequest,
-    SuggestionsResponse,
     TranslateRequest,
     TranslateResponse,
 )
@@ -26,22 +23,29 @@ import system_prompt
 
 logger = logging.getLogger(__name__)
 _RETRYABLE_STATUS_CODES = {500, 502, 503, 504}
+_REQUEST_ISOLATION_RULE = (
+    "Treat this request as fully isolated. Use only the current system instructions and the current input. "
+    "Do not continue, reference, or infer from any previous request, prior example output, or earlier user task."
+)
 
 _CONTEXT_GATE_SYSTEM = (
+    _REQUEST_ISOLATION_RULE + "\n\n"
     "You are a strict context gate for rewritten user messages. "
     "Your job is to keep only outputs that faithfully preserve the original user intent, key topic, and business reason. "
     "The user is always speaking to a third party, never to you.\n"
     "Rules:\n"
-    "1. Remove any meta text, labels, headings, explanations, or commentary (e.g., 'Here's a possible response', 'Option 1', 'emphasizing').\n"
+    "1. Remove any meta text, labels, headings, explanations, or commentary (e.g., 'Here's a possible response', 'Option 1', 'emphasizing', 'here is your isolated request').\n"
     "2. Keep only complete final messages that can be sent as-is.\n"
-    "3. Preserve concrete key facts from the original message (subject, reason, constraints).\n"
-    "4. Do not invent new facts or change the decision meaning.\n"
-    "5. If multiple valid alternatives remain, output them separated only by a standalone line containing 'Or'.\n"
-    "6. If only one valid message remains, output that single message only.\n"
-    "7. Output only the final cleaned message text with no preface or trailing notes."
+    "3. Preserve the original language unless the original message itself asks for another language.\n"
+    "4. Preserve concrete key facts from the original message (subject, reason, constraints).\n"
+    "5. Do not invent new facts or change the decision meaning.\n"
+    "6. If multiple valid alternatives remain, output them separated only by a standalone line containing 'Or'.\n"
+    "7. If only one valid message remains, output that single message only.\n"
+    "8. Output only the final cleaned message text with no preface or trailing notes."
 )
 
 _FORCE_ALTERNATIVES_SYSTEM = (
+    _REQUEST_ISOLATION_RULE + "\n\n"
     "You rewrite a user's message for a third party.\n"
     "Return 2 to 3 distinct, context-faithful alternatives.\n"
     "Rules:\n"
@@ -51,6 +55,14 @@ _FORCE_ALTERNATIVES_SYSTEM = (
     "4. Output alternatives separated only by a standalone line containing 'Or'.\n"
     "5. Each alternative must be a complete final message ready to send."
 )
+
+
+def _linkedinfy_system_prompt() -> str:
+    return f"{_REQUEST_ISOLATION_RULE}\n\n{system_prompt.get_base()}"
+
+
+def _linkedinfy_user_message(message: str) -> str:
+    return f"Rewrite: {message}"
 
 
 def _count_or_alternatives(text: str) -> int:
@@ -113,10 +125,10 @@ def _split_or_alternatives(text: str) -> list[str]:
     return unique
 
 
-async def _ollama_chat_with_retry(model: str, system: str, user: str) -> str:
+async def _ollama_chat_with_retry(model: str, system: str, user: str, few_shot: list[dict] | None = None) -> str:
     for attempt in range(1, CHAT_RETRY_ATTEMPTS + 1):
         try:
-            return await ollama_chat(model, system, user)
+            return await ollama_chat(model, system, user, few_shot=few_shot)
         except httpx.HTTPStatusError as exc:
             status_code = exc.response.status_code if exc.response else None
             retryable = status_code in _RETRYABLE_STATUS_CODES
@@ -170,7 +182,12 @@ async def _context_gate_response(
 
 
 async def _linkedinfy_message(model: str, message: str) -> str:
-    response = await _ollama_chat_with_retry(model, system_prompt.get(), message)
+    response = await _ollama_chat_with_retry(
+        model,
+        _linkedinfy_system_prompt(),
+        _linkedinfy_user_message(message),
+        few_shot=system_prompt.get_few_shot(),
+    )
     return response.strip() or message
 
 
@@ -201,12 +218,11 @@ async def _finalize_alternative_messages(model: str, original_message: str, sugg
 
     for suggestion in suggestions:
         gated = await _context_gate_response(model, original_message, suggestion)
-        translated = await _translate_message(model, gated)
-        key = translated.lower()
+        key = gated.lower()
         if key in seen:
             continue
         seen.add(key)
-        finalized.append(translated)
+        finalized.append(gated)
 
     return finalized
 
@@ -225,8 +241,7 @@ router = APIRouter()
 async def chat(request: ChatRequest):
     try:
         linked = await _linkedinfy_message(request.model, request.message)
-        gated = await _context_gate_response(request.model, request.message, linked)
-        response = await _translate_message(request.model, gated)
+        response = await _context_gate_response(request.model, request.message, linked)
 
         if CHAT_ENABLE_CONTEXT_GATE and CHAT_MIN_ALTERNATIVES > 1 and _count_or_alternatives(response) < CHAT_MIN_ALTERNATIVES:
             alternatives = await _generate_alternative_messages(request.model, request.message, response)
@@ -266,34 +281,19 @@ async def chat_pipeline_translate(request: TranslateRequest):
     return TranslateResponse(model=request.model, response=response)
 
 
-@router.post("/chat/pipeline/suggestions", response_model=SuggestionsResponse)
-async def chat_pipeline_suggestions(request: SuggestionsRequest):
-    try:
-        suggestions = await _generate_alternative_messages(request.model, request.original_message, request.primary_message)
-    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
-        raise _map_pipeline_error(exc)
-    return SuggestionsResponse(model=request.model, suggestions=suggestions)
-
-
-@router.post("/chat/pipeline/suggestions/finalize", response_model=SuggestionsResponse)
-async def chat_pipeline_finalize_suggestions(request: SuggestionsFinalizeRequest):
-    try:
-        suggestions = await _finalize_alternative_messages(request.model, request.original_message, request.suggestions)
-    except (httpx.HTTPStatusError, httpx.RequestError) as exc:
-        raise _map_pipeline_error(exc)
-    return SuggestionsResponse(model=request.model, suggestions=suggestions)
-
-
 @router.post("/chat/stream")
 async def chat_stream(request: ChatRequest):
     try:
-        translated = await _translate_message(request.model, request.message)
+        async def event_stream():
+            async for token in ollama_chat_stream(
+                request.model,
+                _linkedinfy_system_prompt(),
+                _linkedinfy_user_message(request.message),
+                few_shot=system_prompt.get_few_shot(),
+            ):
+                yield f"data: {json.dumps({'token': token})}\n\n"
+            yield f"data: {json.dumps({'done': True, 'model': request.model})}\n\n"
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
     except (httpx.HTTPStatusError, httpx.RequestError) as exc:
         raise _map_pipeline_error(exc)
-
-    async def event_stream():
-        async for token in ollama_chat_stream(request.model, system_prompt.get(), translated):
-            yield f"data: {json.dumps({'token': token})}\n\n"
-        yield f"data: {json.dumps({'done': True, 'model': request.model})}\n\n"
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream")

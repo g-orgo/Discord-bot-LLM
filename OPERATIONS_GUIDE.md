@@ -64,8 +64,6 @@ Optional extra alternatives are controlled by config flags and can trigger addit
 - POST /chat/pipeline/linkedinfy
 - POST /chat/pipeline/context-gate
 - POST /chat/pipeline/translate
-- POST /chat/pipeline/suggestions
-- POST /chat/pipeline/suggestions/finalize
 
 These endpoints exist so the Discord bot can keep one visible message updated and stop early when optional suggestion generation is not needed.
 
