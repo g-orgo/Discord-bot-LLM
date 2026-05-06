@@ -1,0 +1,7 @@
+{
+  "title": "Generic test sentence stays on its own topic",
+  "user_request": "Rewrite: Agora um teste um pouco mais complexo com um pouco mais de texto",
+  "expected_output": "Agora, um teste um pouco mais complexo e com um pouco mais de texto.",
+  "notes": "Generic or test-like input must be rewritten in isolation. Do not continue a previous example, do not add headings, and do not invent source text.",
+  "source": "regression"
+}
